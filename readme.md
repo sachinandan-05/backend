@@ -4,3 +4,4 @@ backend devloper
 
 extra things used in this ptoject:
 1 gitignore generator
+2> nodemon (npm i -D nodemon)
