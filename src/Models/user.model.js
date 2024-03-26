@@ -58,7 +58,7 @@ const userSchema=new Schema({
         trim:true,
         index:true
     },
-    refresToken:{
+    refreshToken:{
         type:String
     }
 
@@ -70,7 +70,7 @@ userSchema.pre("save",async function(next){
     next()
 })
 userSchema.methods.isPasswardCorrect=async function(passward){
-   return await bcrypt.compare(passward,this.passward);
+    return await bcrypt.compare(passward,this.passward);
 
 }
 userSchema.methods.generateAccessToken=function(){

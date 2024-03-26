@@ -34,7 +34,7 @@ const app =express()
     try{
         await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
         app.on("error",(error)=>{
-            console.log("Error:",error);
+            console.log("Error: app is not able to connect with db",error);
             throw error
         })
         app.listen(process.env.PORT,()=>{

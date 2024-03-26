@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { resisterUser } from "../controllers/user.controller.js";
+import { loginUSer, logoutUser, resisterUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router= Router()
 router.route("/register").post(
@@ -14,8 +15,13 @@ router.route("/register").post(
         {
             name:"coverImage",
             maxCount:1
-         }
+        }
     ])
     ,resisterUser)
+
+router.route("/login").post(loginUSer)
+
+    //secured routes
+    router.route("/logout").post(verifyJWT,logoutUser)
 
 export default router;
