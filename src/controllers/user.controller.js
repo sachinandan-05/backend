@@ -37,12 +37,9 @@ const resisterUser= asyncHandler(async(req,res)=>{
    const { fullname,email,username,passward}=req.body
    console.log("email:",email, "username:",username,"fullname:",fullname,passward)
 
-   if (fullname==="") {
-      throw new apiError(400,"fullname is required") 
-   }
-
+   //  
    if (
-      [fullname,email,username,passward].some((field)=>field?.trim==="")
+      [fullname,email,username,passward].some((field)=>field?.trim()==="")
    ) {
       throw new apiError(400,"all fields are required")
    }
@@ -57,6 +54,7 @@ const resisterUser= asyncHandler(async(req,res)=>{
 
    const avataLocalPath = req.files?.avatar[0]?.path
    const coverImageLocalPath= req.files?.coverImage[0]?.path
+   console.log(avataLocalPath,coverImageLocalPath);
 
    if (!avataLocalPath) {
    throw new apiError(400,"Avatar is required")
@@ -223,5 +221,134 @@ const refreshAccessToken= asyncHandler(async()=>{
 
 
 })
+const changeCurrentPassward = asyncHandler(async(req,res)=>{
+   //frontend se current passward and username or email lenge
+   //will match data from database
+   //ask for new passward 2 times and then update
 
-export {resisterUser,loginUSer,logoutUser,refreshAccessToken}
+   const{newPassward,oldPassward}=req.body
+
+   const user = await User.findById(req.user?._id)
+   const isPasswordCorrect = await user.isPasswardCorrect(oldPassward)
+
+   if (!isPasswordCorrect) {
+      throw new apiError(400, "Invalid old password")
+   }
+
+   user.passward=newPassward
+
+   await user.save({validateBeforeSave:false})
+
+   return res
+   .status(200)
+   .json(
+      new apiResponse(200,{},"passward updated successfully")
+   )
+    // now?
+})
+const getCurrentUser = asyncHandler(async(req, res) => {
+   return res
+   .status(200)
+   .json(new apiResponse(
+      200,
+      req.user,
+      "User fetched successfully"
+   ))
+})
+
+const updateAcountDetails = asyncHandler(async(req,res)=>{
+
+   const {fullname,email}=req.body
+
+   if (!(fullname || email)) {
+      throw new apiError (400,"all fields are required")   
+   }
+
+   const user = User.findByIdAndUpdate(req.user?._id,
+      {
+         $set: {
+            fullname:fullname,
+            email:email
+         }
+            
+         
+      },{new:true})
+      return res
+      .status(200)
+      .json(new apiResponse(200,user,"Account details updated successfully"))
+
+})
+
+const updateUserAvatar = asyncHandler(async(req,res)=>{
+
+   const avataLocalPath = req.files?.path
+
+   if (!avataLocalPath) {
+      throw new apiError (400," avatar file is missing")
+      
+   }
+
+   const avatar= await uploadOnCloudnary(avataLocalPath)
+
+   if (!avatar.url) {
+      throw new apiError(400,"error while uploding avatar")
+      
+   }
+   // TODO delete old  avatar
+   
+   const user= await User.findByIdAndUpdate(
+      {
+         $set:{
+            avatar:avatar.url
+         }
+      },
+      {new:true}
+   ).select("-passward")
+   return res
+   .status(200)
+   .json(new apiResponse(200,user,"avatar image updated successfully"))
+
+
+
+
+   
+})
+
+const updateCoverImage =asyncHandler(async(req,res)=>{
+
+   const coverImageLocalPath =req.files?.path
+   if (!coverImageLocalPath) {
+      throw new apiError (400,"coverImage file is required")
+      
+   }
+   const coverImage = await uploadOnCloudnary(coverImageLocalPath)
+   if (!coverImage.url) {
+      throw new apiError (400,"error while uploding cover image!!")
+      
+   }
+
+   const user= await User.findByIdAndUpdate(req.user?._id,
+      {
+         $:{
+            coverImage:coverImage.url
+         }
+      },{
+         new:true
+      }).select("-passward")
+      
+      return res
+      .status(200)
+      .json(200,user,"coverImage updated successfully")
+})
+
+
+
+export {resisterUser,
+   loginUSer,
+   logoutUser,
+   refreshAccessToken,
+   changeCurrentPassward,
+   getCurrentUser,
+   updateAcountDetails,
+   updateUserAvatar,
+   updateCoverImage }

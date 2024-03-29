@@ -10,12 +10,8 @@ const userSchema=new Schema({
         trim:true,
         index:true
     },
-    email :{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true
-    },
+    
+    
     fullname:{
         type:String,
         required:true,
@@ -86,6 +82,8 @@ userSchema.methods.generateAccessToken=function(){
         }
         )
     }
+
+
     userSchema.methods.generateRefreshToken=function(){
     return  jwt.sign({
         _id:this._id,
