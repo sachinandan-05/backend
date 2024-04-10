@@ -6,10 +6,10 @@ import { createPlaylist,
     removeVideoFromPlaylist ,
     deletePlaylist,
     UpdatePlaylist
-} from "../controllers/playList.controller";
+} from "../controllers/playList.controller.js";
 
-const playListrouter =Router()
+const router =Router()
 
-playListrouter.route("/create").post(createPlaylist)
+router.route("/create").post(createPlaylist)
 
-export default playListrouter;
+export default router;

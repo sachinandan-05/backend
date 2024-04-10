@@ -1,9 +1,9 @@
-import { asyncHandler } from "../utils/asyncHandler";
-import { apiError } from "../utils/apiError";
-import { apiResponse } from "../utils/apiResponse";
-import { Playlist } from "../Models/playlist.model";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { apiError } from "../utils/apiError.js";
+import { apiResponse } from "../utils/apiResponse.js";
+import { Playlist } from "../Models/playlist.model.js";
 import { isValidObjectId, pluralize } from "mongoose";
-import { Video } from "../Models/video.model";
+// import { Video } from "../Models/video.model";
 import { json } from "express";
 
 
@@ -12,14 +12,14 @@ const createPlaylist = asyncHandler(async(req,res)=>{
 //take details from users
 const {playlistName,discription}=req.body
 
-if(!playlistName){
-    throw new apiError(400,"name of playlist is required")
-}
+// if(!playlistName){
+//     throw new apiError(400,"name of playlist is required")
+// }
 
 try {
     const newPlaylist = await Playlist.create(
         {
-            playlist:playlistName,
+            playlistName:playlistName,
             discription:discription || "playlist discription",
             videos:[],
             owner:req.user._id
@@ -36,6 +36,7 @@ try {
         res
         .status(201)
         .json(new apiResponse(201, newPlaylist, "Playlist created successfully"))
+        console.log (newPlaylist);
     
     
     }
@@ -243,7 +244,7 @@ try {
         if (!playlistName) {
             throw new apiError(404, "Name is required to update the playlist");
         }
-        const umpdatedPlaylist= await findByIdAndUpdate(playlistId,
+        const UpdatedPlaylist= await findByIdAndUpdate(playlistId,
             {
                 playlist:playlistName,
                 discription:discription
