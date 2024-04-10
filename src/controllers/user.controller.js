@@ -36,7 +36,7 @@ const resisterUser= asyncHandler(async(req,res)=>{
    //return res
 
    const { fullname,email,username,passward}=req.body
-   console.log("email:",email, "username:",username,"fullname:",fullname,passward)
+   // console.log("email:",email, "username:",username,"fullname:",fullname,passward)
 
    //  
    if (
