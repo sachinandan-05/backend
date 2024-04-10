@@ -207,27 +207,59 @@ const deletePlaylist =asyncHandler(async(req,res)=>{
         
     }
     
-    const playlist= await Playlist.findById(playlistId)
-
-    if (!playlist) {
-        throw  new apiError (404 ,"playlist doesnot exist")
-        
-    }
-
-    const removePlaylist = await Playlist.findByIdAndDelete(
-        playlistId,
-        {
-            $pull:{
-                _id:playlistId
-            }
+try {
+        const playlist= await Playlist.findById(playlistId)
+    
+        if (!playlist) {
+            throw  new apiError (404 ,"playlist doesnot exist")
+            
         }
-    )
-
-    res
-    .status(204)
-    .json(new apiResponse(204,removePlaylist,"playlist deleted !!"))
+    
+        const removePlaylist = await Playlist.findByIdAndDelete(playlistId, {
+            new:true,
+            validateBeforeSave:false
+        })
+    
+        res
+        .status(204)
+        .json(new apiResponse(204,removePlaylist,"playlist deleted successfully !!"))
+} catch (error) {
+    throw new apiError(400,"something went wrong while deleting playlist !!")
+    
+}
 })
 
+// ---------------------UpdatePlaylist------------------------
+
+const UpdatePlaylist = asyncHandler(async(req,res)=>{
+    const {playlistId}=req.params
+    const {playlistName,discription}=req.body
+try {
+    
+        if (!isValidObjectId(playlistId)) {
+            throw  new apiError(400,"plalist id isnot valid:please provide a valid playlistId")
+            
+        }
+        if (!playlistName) {
+            throw new apiError(404, "Name is required to update the playlist");
+        }
+        const umpdatedPlaylist= await findByIdAndUpdate(playlistId,
+            {
+                playlist:playlistName,
+                discription:discription
+            },
+            {new: true, validateBeforeSave: false})
+    
+            res 
+            .status(202)
+            json(new apiResponse(202,UpdatedPlaylist,"playlist info updated successfully"))
+    
+} catch (error) {
+    throw new apiError(400,"something went wrong while updating playlist")
+    
+}
+
+})
 
 
 
@@ -236,5 +268,8 @@ export{
     getuserPlaylist,
     getPlaylistById,
     addingVideoInPLaylist,
-    removeVideoFromPlaylist 
+    removeVideoFromPlaylist ,
+    deletePlaylist,
+    UpdatePlaylist
+
 }
