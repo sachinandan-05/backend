@@ -2,14 +2,15 @@ import mongoose ,{Schema}from "mongoose"
 const playlistSchema=new Schema({
     playlistName:{
         type:String,
-        required:[true,"name of playlist must be required"],
+        // required:[true,"name of playlist must be required"],
         lowercase:true,
         trim:true
     },
     
-    discription:{
+    description:{
         type:String,
         lowercase:true,
+        required:true
         
     },
     videos:[

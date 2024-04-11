@@ -26,7 +26,7 @@ const userSchema=new Schema({
     },
     coverImage:{
         type:String, //cloudinary uri
-        // required:true
+        required:true
 
 
     },

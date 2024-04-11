@@ -7,45 +7,44 @@ import { isValidObjectId, pluralize } from "mongoose";
 import { json } from "express";
 
 
-// --------------create playlist--------- 
-const createPlaylist = asyncHandler(async(req,res)=>{
-//take details from users
-const {playlistName,discription}=req.body
+//------------------createPlaylist----------------
 
-// if(!playlistName){
-//     throw new apiError(400,"name of playlist is required")
-// }
+const createPlaylist = asyncHandler(async (req, res) => {
+    const {playlistName} = req.body
+    const {description}= req.body
 
-try {
-    const newPlaylist = await Playlist.create(
-        {
-            playlistName:playlistName,
-            discription:discription || "playlist discription",
-            videos:[],
-            owner:req.user._id
-    
-    
-        }
-        )
-        if (!newPlaylist) {
-            throw new apiError(404,"cant create playlist with this info")
-            
-        }
-    
+    // TODO: create playlist
+    if (!playlistName) {
+        throw new apiError(404, "Name of playlist is required")
+    }
+    console.log(playlistName);
+
+    try {
         
+        const newPlaylist = await Playlist.create(
+            {
+                playlistName,
+                description: description || "Playlist Description",
+                // videos: [],
+                // owner:req.User._id
+            }
+            )
+
+        if (!newPlaylist) {
+            throw new apiError(404, "Could not create playlist with info:")
+        }
+
+
         res
         .status(201)
         .json(new apiResponse(201, newPlaylist, "Playlist created successfully"))
-        console.log (newPlaylist);
-    
-    
+    } catch (error) {
+        throw new apiError(500, error, "An error while creating playlist : try again later")
     }
 
-catch (error) {
-    throw new apiError(400,error,"something went wrong while creating playlist:try again later")
-    
-}
-})  //playlist created
+})//DONE!
+
+
 
 
 // ----------get User's Playlist-------------
