@@ -22,7 +22,7 @@ const uploadOnCloudnary= async (localFilePath)=>{
 
     }
     catch(error){
-        // fs.unlinkSync(localFilePath)//remove the locally save file as the upload opration failed
+        fs.unlinkSync(localFilePath)//remove the locally save file as the upload opration failed
         return null;
     }
 }

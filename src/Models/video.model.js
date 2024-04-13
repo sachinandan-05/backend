@@ -21,7 +21,7 @@ const videoSchema=new mongoose.Schema(
         },
         duration:{
             type:Number,
-            required:true
+            // required:true
         },
         veiws:{
             type:Boolean,
@@ -32,7 +32,7 @@ const videoSchema=new mongoose.Schema(
             default:true
         },
         owner:{
-            type:Schema.type.ObjectID,
+            type:Schema.Types.ObjectId,
             ref:"User"
         }
 
