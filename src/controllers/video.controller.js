@@ -3,7 +3,8 @@ import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { Video } from "../Models/video.model.js";
 import {json, query  }from "express";
-import { uploadOnCloudnary } from "../utils/cloudnary.js";
+import { deleteFromCloudnary, uploadOnCloudnary } from "../utils/cloudnary.js";
+import { isValidObjectId } from "mongoose";
 
 //get all video
 //pulishvideo
@@ -21,7 +22,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     console.log(query, sortType, sortBy, user_Id,"query, sortType, sortBy, sortBy")
     try{
       // Parse page and limit parameters
-        const pageNumber = parseInt(page);
+        const pageNumber = parseInt(page); // function parses a string argument and returns an integer
         const pageLimit = parseInt(limit);
 
       // Calculate the skip value for pagination
@@ -60,7 +61,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             {
                 $addFields:{
                     ownerDetails:{
-                    $first:"$ownerDetails"
+                     $first:"$ownerDetails"
                 }
             }
             }
@@ -220,6 +221,9 @@ const  publishVideo= asyncHandler(async(req,res)=> {
             discription:discription,
             videoFile:videoFile.url,
             thumbNail:thumbNail.url,
+            duration: videoUploaded.duration,
+            isPublished:true,
+            owner: req.user?._id // bcz we have added useer object thoru veirfyjwt 
     
         })
         console.log(video);
@@ -236,7 +240,152 @@ const  publishVideo= asyncHandler(async(req,res)=> {
 
 })
 
+// -------------------------edit Info Of video---------------------------
+
+const editInfoOfVideo=asyncHandler(async(req,res)=>{
+    const {video_id}=req.params
+    if (!video_id) {
+        throw new apiError(400,"invalid user id")
+        
+    }
+    const thumbNailLocalPath=req.file?.path
+    const thumbNail=uploadOnCloudnary(thumbNailLocalPath)
+    const{title,discription}=req.body
+    if (!(title || discription || thumbNail)) {
+        throw new apiError (404,"info must required")
+        
+    }
+
+    const video= await Video.findByIdAndUpdate(
+        video_id,
+        {
+            $set:{
+                title,
+                discription,
+                thumbNail:thumbNail.url
+            }
+        },{new:true,validatBeforeSave:false})
+
+        res
+    .status(201)
+    .json(new apiResponse(201,video,"video info updated successfully"))
+
+    }
+
+    )
+    
+    
+// --------------------------delete video -------------------------
+
+const deleteVideo=asyncHandler(async(req,res)=>{
+    const{video_id}=req.body
+
+    if (!isValidObjectId(video_id)  && !( video_id?.trim())) {
+        throw new apiError(400, "enter valid video id")
+        
+    }
+
+    // delete from the cloudinary
+    try {
+        const video = await Video.findById(video_id)
+
+        if (!video) {
+            throw new apiError(404, "Video not found");
+        }
+
+
+        const videoUrl = video.videoFile  // extract video url from video document
+
+        const urlArrayOfVideo = videoUrl.split("/") // split url into array from every / point
+
+        const videoFromUrl = urlArrayOfVideo[urlArrayOfVideo.length - 1] // extracting video name with format
+
+        const videoName = videoFromUrl.split(".")[0]   // .mp4 or .png etc should be removed to get name of url
+        
+        // for thumbnail 
+        
+        const thumbnailUrl = video.thumbnail  // extract video url from video document
+
+        const urlArrayOfThumbnail = thumbnailUrl.split("/") // split url into array from every / point
+
+        const thumbnailFromUrl = urlArrayOfThumbnail[urlArrayOfThumbnail.length - 1] // extracting video name with format 
+
+        const thumbnailName = thumbnailFromUrl.split(".")[0] // only name of thumbnail without any format
+    
+        if (video.owner.toString()=== req.user._id.toString()) {
+
+            const deleteVideo= await Video.findByIdAndDelete(video_id)
+            
+        }
+
+        if (!deleteVideo) {
+            throw new apiError(400,"video already deleted")
+            
+        }
+        await deleteFromCloudnary(videoName); // Delete video file
+
+        await cloudinary.uploader.destroy(thumbnailName,
+            {
+                invalidate: true,
+               // resource_type:"image"
+            },
+            (error,result) => {
+            console.log("result:", result, ", error:", error, "result or error after deleting thumbnail from cloudinary")
+            }
+        ); // Delete thumbnail
+
+        const comments = await Comment.find({ video: deleteResultFromDatabase._id});
+
+        const commentsIds = comments.map((comment) => comment._id); // taking out the commentId
+        
+        await Like.deleteMany({video: deleteResultFromDatabase._id});
+        await Like.deleteMany({comment: { $in: commentsIds }}); // deleting all comments of the video
+        await Comment.deleteMany({video: deleteResultFromDatabase._id});
+            
+        res
+        .status(200)
+        .json(new apiResponse(200, video, "Video deleted from database"))
+    } catch (error) {
+        throw new apiError(500, error, "Failed to delete video:Try again later");
+    }
+
+    
+
+
+
+    res
+    .status(200)
+    .json(new apiResponse(200,deleteVideo,"video removed sucessfully"))
+})
+
+
+/*----------------TOGGLEPUBLISHSTATUS----------------*/
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+    const { video_id } = req.params
+    console.log(video_id, "video id")
+    if (!video_id) {
+        throw new apiError(404, "enter valid video id to know publish status") 
+    }
+    const video = await Video.findById(video_Id)
+    console.log(video, "video")
+
+    if (!video) {
+        throw new apiError(400, "Can not toggle publish status , Either video does no texist or already deleted")
+    }
+
+    video.isPublished = !video.isPublished
+    await  video.save({ validateBeforeSave: false })
+
+    res
+    .status(200)
+    .json(new apiResponse(200, video_Id, "Video status is toggled successfully"))
+
+})
 export{
     publishVideo,
     getAllVideos,
+    editInfoOfVideo,
+    deleteVideo,
+    togglePublishStatus
 }

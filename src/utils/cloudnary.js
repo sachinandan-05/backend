@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary';
 import fs from 'fs'
+import { apiError } from './apiError';
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUD_NAME, 
@@ -27,4 +28,20 @@ const uploadOnCloudnary= async (localFilePath)=>{
     }
 }
 
-export {uploadOnCloudnary}
+const deleteFromCloudnary=async(oldfileId)=>{
+    try {
+        if (!oldfileId) return null ;
+    
+        // delete the file from cloudinary
+        const response = await cloudinary.uploader.destroy(oldfileId,{invalidate:true,resource_type:"video"});
+        return response
+            
+    } catch (error) {
+        throw new apiError(404,"something went wrong while deleting video")
+        
+    }
+    
+
+}
+
+export {uploadOnCloudnary,deleteFromCloudnary}
