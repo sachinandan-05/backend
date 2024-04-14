@@ -1,10 +1,11 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
+import mongoose, {isValidObjectId} from "mongoose"
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { Video } from "../Models/video.model.js";
 import {json, query  }from "express";
 import { deleteFromCloudnary, uploadOnCloudnary } from "../utils/cloudnary.js";
-import { isValidObjectId } from "mongoose";
+
 
 //get all video
 //pulishvideo
@@ -14,12 +15,12 @@ import { isValidObjectId } from "mongoose";
 //----------------------get all videos-------------------------
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, user_Id } = req.query
+    const { page = 1, limit = 10, query, sortBy, sortType, user_id } = req.query
     //TODO: get all videos based on query, sort, pagination
-    if (!(query || isValidObjectId(user_Id))) {
-        throw new apiError(400, "Required field: query or userId")
-    }
-    console.log(query, sortType, sortBy, user_Id,"query, sortType, sortBy, sortBy")
+    // if (!(query || isValidObjectId(user_id))) {
+    //     throw new apiError(400, "Required field: query or userId")
+    // }
+    console.log(query, sortType, sortBy, user_id,"query, sortType, sortBy, sortBy")
     try{
       // Parse page and limit parameters
         const pageNumber = parseInt(page); // function parses a string argument and returns an integer
@@ -34,9 +35,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
         {
             $match: {
             $or: [
-                { title: { $regex: query, $options: "i" } },
-                { description: { $regex: query, $options: "i" } },
-                { owner:new mongoose.Types.ObjectId(user_Id) }
+                { title: { $regex: 'query', $options: "i" } },
+                { description: { $regex: 'query', $options: "i" } },
+                { owner:new mongoose.Types.ObjectId(user_id) }
             ]
             }/* This stage matches documents based on the specified criteria: matching the title or description fields using case-insensitive regular expressions ($regex), or matching the owner field with the provided user_Id*/
         },
@@ -61,7 +62,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             {
                 $addFields:{
                     ownerDetails:{
-                     $first:"$ownerDetails"
+                    $first:"$ownerDetails"
                 }
             }
             }
@@ -221,9 +222,9 @@ const  publishVideo= asyncHandler(async(req,res)=> {
             discription:discription,
             videoFile:videoFile.url,
             thumbNail:thumbNail.url,
-            duration: videoUploaded.duration,
+            duration: videoFile.duration,
             isPublished:true,
-            owner: req.user?._id // bcz we have added useer object thoru veirfyjwt 
+            // owner: req.user?._id // bcz we have added useer object thoru veirfyjwt 
     
         })
         console.log(video);
