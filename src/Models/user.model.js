@@ -68,7 +68,7 @@ userSchema.methods.isPasswardCorrect=async function(passward){
     return await bcrypt.compare(passward,this.passward);
 
 }
-userSchema.methods.generateAccessToken=function(){
+userSchema.methods.generateAccessToken= function(){
     return  jwt.sign({
 
         _id:this._id,

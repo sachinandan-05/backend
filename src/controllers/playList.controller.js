@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { apiError } from "../utils/apiError.js";
-import { apiResponse } from "../utils/apiResponse.js";
+import { apiError } from "../utils/ApiError.js";
+import { apiResponse } from "../utils/ApiResponse.js";
 import { Playlist } from "../Models/playlist.model.js";
 import { isValidObjectId, pluralize } from "mongoose";
 // import { Video } from "../Models/video.model";
@@ -25,8 +25,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
             {
                 playlistName,
                 description: description || "Playlist Description",
-                // videos: [],
-                // owner:req.User._id
+                videos: [],
+                owner:req.User._id
             }
             )
 

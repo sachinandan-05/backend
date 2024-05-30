@@ -173,12 +173,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
 })//Done loading videos from database
 
-
-
-
-
-
-// ----------------------publishVideo----------------------------
+  // ----------------------publishVideo----------------------------
 const  publishVideo= asyncHandler(async(req,res)=> {
 
     const { title,discription }=req.body

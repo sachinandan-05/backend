@@ -52,7 +52,7 @@ router
     .patch(upload.single("thumbnail"), editInfoOfVideo);
 
 router.route("/toggle/publish/:video_Id").patch(togglePublishStatus);
+router.route("/edit")
 
 export default router
 
-router.route("/edit")

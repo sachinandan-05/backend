@@ -1,8 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { apiError } from "../utils/apiError.js";
+import { apiResponse } from "../utils/ApiResponse.js";
+import {apiError} from "../utils/ApiError.js";
 import {User} from "../Models/user.model.js";
 import { uploadOnCloudnary } from "../utils/cloudnary.js";
-import { apiResponse } from "../utils/apiResponse.js";
+
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
@@ -13,7 +14,6 @@ const generateAccessAndRefreshTokens = async(userId) =>{
       const refreshToken= await user.generateRefreshToken();
 
       user.refreshToken=refreshToken
-      await user.save({ validateBeforeSave: false});
 
       return {accessToken,refreshToken};
 
